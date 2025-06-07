@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🏝️ Matrix Island Counter</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #ffffff;
+      color: #111111;
+      padding: 30px;
+      text-align: center;
+    }
+
+    textarea {
+      width: 380px;
+      height: 160px;
+      padding: 10px;
+      font-size: 16px;
+      font-family: monospace;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 10px 24px;
+      font-size: 16px;
+      background-color: #2a74f6;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    button:hover {
+      background-color: #1c5bd9;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0;
+      font-weight: 500;
+    }
+
+    #output {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 13px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🏝️ Matrix Island Counter</h2>
+  <p>Enter 0s and 1s (space-separated, each row on a new line):</p>
+
+  <textarea id="matrix-input">1 1 0 0
+0 1 0 0
+0 0 1 1
+0 0 0 1</textarea><br>
+
+  <label>
+    <input type="checkbox" id="diagonal-toggle" />
+    🔄 Enable Diagonal Connectivity (8-directional)
+  </label>
+
+  <button onclick="countIslands()">Count Islands</button>
+
+  <div id="output"></div>
+
+  <script>
+    function countIslands() {
+      const input = document.getElementById("matrix-input").value.trim();
+      const enableDiagonal = document.getElementById("diagonal-toggle").checked;
+
+      const matrix = input.split('\n').map(row =>
+        row.trim().split(/\s+/).map(Number)
+      );
+
+      const rows = matrix.length;
+      const cols = matrix[0].length;
+      const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+
+      const directions4 = [
+        [-1, 0], [1, 0], [0, -1], [0, 1]
+      ];
+      const directions8 = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1],          [0, 1],
+        [1, -1],  [1, 0], [1, 1]
+      ];
+
+      const directions = enableDiagonal ? directions8 : directions4;
+
+      function dfs(r, c) {
+        visited[r][c] = true;
+        for (let [dr, dc] of directions) {
+          const nr = r + dr;
+          const nc = c + dc;
+          if (
+            nr >= 0 && nr < rows && nc >= 0 && nc < cols &&
+            matrix[nr][nc] === 1 && !visited[nr][nc]
+          ) {
+            dfs(nr, nc);
+          }
+        }
+      }
+
+      let count = 0;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (matrix[r][c] === 1 && !visited[r][c]) {
+            dfs(r, c);
+            count++;
+          }
+        }
+      }
+
+      const mode = enableDiagonal ? "8-directional 🌐" : "4-directional ➕";
+      document.getElementById("output").innerHTML =
+        count === 0
+          ? `❌ No islands found (${mode})`
+          : `✅ ${count} island(s) found (${mode})`;
+    }
+  </script>
+
+</body>
+</html>
